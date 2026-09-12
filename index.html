@@ -354,37 +354,10 @@ let GPS_TERAKHIR = null;
 // ======================================================
 
 function getDeviceId() {
-
-  let deviceId =
-    localStorage.getItem(
-      "JPID_DEVICE_ID"
-    );
-
-
-  if (!deviceId) {
-
-    deviceId =
-      "DEV-KIOSK-" +
-      Date.now().toString(36).toUpperCase() +
-      "-" +
-      Math.random()
-        .toString(36)
-        .substring(2, 7)
-        .toUpperCase();
-
-
-    localStorage.setItem(
-      "JPID_DEVICE_ID",
-      deviceId
-    );
-
-  }
-
-
+  const deviceId = "DEV-KIOSK-01";
+  localStorage.setItem("JPID_DEVICE_ID", deviceId);
   return deviceId;
-
 }
-
 
 
 // ======================================================
