@@ -304,13 +304,14 @@ button:disabled {
 
 
   <button
-    id="btnPulang"
-    class="btnPulang"
-    disabled>
+  id="btnPulang"
+  class="btnPulang"
+  onclick="kirimPulang()"
+  disabled>
 
-    PULANG
+  PULANG
 
-  </button>
+</button>
 
 
   <div id="statusAbsensi">
@@ -1101,7 +1102,7 @@ function tampilkanKaryawan(karyawan) {
   document.getElementById(
     "btnPulang"
   ).disabled =
-    true;
+   false;
 
 }
 
@@ -1361,7 +1362,209 @@ async function kirimMasuk() {
 
     return;
   }
+// ======================================================
+// ABSENSI PULANG
+// ======================================================
 
+async function kirimPulang() {
+
+  const statusAbsensi =
+    document.getElementById(
+      "statusAbsensi"
+    );
+
+  const btnPulang =
+    document.getElementById(
+      "btnPulang"
+    );
+
+  if (SEDANG_MENGIRIM) {
+    return;
+  }
+
+  if (!KARYAWAN_AKTIF) {
+
+    statusAbsensi.innerHTML =
+      "❌ Karyawan belum dikenali.";
+
+    return;
+  }
+
+  if (
+    !FACE_SCORE_TERAKHIR ||
+    FACE_SCORE_TERAKHIR < 0.50
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ Verifikasi wajah belum valid.";
+
+    return;
+  }
+
+  if (!GPS_TERAKHIR) {
+
+    statusAbsensi.innerHTML =
+      "❌ GPS belum diambil.<br>" +
+      "Tekan AMBIL LOKASI GPS terlebih dahulu.";
+
+    return;
+  }
+
+  try {
+
+    SEDANG_MENGIRIM =
+      true;
+
+    btnPulang.disabled =
+      true;
+
+    btnPulang.innerHTML =
+      "⏳ MENGIRIM...";
+
+    statusAbsensi.innerHTML =
+      "⏳ Mengirim absensi PULANG dan GPS ke server...";
+
+    const deviceId =
+      getDeviceId();
+
+    const respon =
+      await kirimDataAbsensi(
+
+        KARYAWAN_AKTIF.idKaryawan,
+
+        "PULANG",
+
+        deviceId,
+
+        "KIOSK",
+
+        FACE_SCORE_TERAKHIR,
+
+        GPS_TERAKHIR.latitude,
+
+        GPS_TERAKHIR.longitude,
+
+        GPS_TERAKHIR.accuracy
+
+      );
+
+    if (
+      !respon ||
+      respon.sukses !== true
+    ) {
+
+      statusAbsensi.innerHTML =
+
+        "❌ Absensi PULANG gagal.<br>" +
+
+        (
+          respon &&
+          respon.pesan
+            ? respon.pesan
+            : "Tidak ada respons server."
+        );
+
+      btnPulang.disabled =
+        false;
+
+      btnPulang.innerHTML =
+        "PULANG";
+
+      return;
+    }
+
+    const transaksi =
+      respon.transaksi || {};
+
+    const geofence =
+      respon.geofence || {};
+
+    let jarakGeo =
+      geofence.jarak;
+
+    if (
+      jarakGeo === "" ||
+      jarakGeo === null ||
+      jarakGeo === undefined
+    ) {
+
+      jarakGeo = "-";
+
+    }
+    else {
+
+      jarakGeo =
+        Number(jarakGeo).toFixed(2) +
+        " meter";
+    }
+
+    statusAbsensi.innerHTML =
+
+      "✅ <b>ABSENSI PULANG BERHASIL</b><br>" +
+
+      KARYAWAN_AKTIF.nama +
+
+      "<br>" +
+
+      "Tanggal: <b>" +
+      (transaksi.tanggal || "-") +
+      "</b><br>" +
+
+      "Jam: <b>" +
+      (transaksi.jam || "-") +
+      "</b><br>" +
+
+      "Lokasi ID: <b>" +
+      (geofence.lokasiId || "-") +
+      "</b><br>" +
+
+      "Jarak: <b>" +
+      jarakGeo +
+      "</b><br>" +
+
+      "Geofence: <b>" +
+      (geofence.status || "-") +
+      "</b><br>" +
+
+      "ID: " +
+      (transaksi.idTransaksi || "-");
+
+    btnPulang.innerHTML =
+      "✅ PULANG TERCATAT";
+
+    btnPulang.disabled =
+      true;
+
+    document.getElementById(
+      "btnMasuk"
+    ).disabled =
+      true;
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+    statusAbsensi.innerHTML =
+
+      "❌ Gagal mengirim absensi PULANG:<br>" +
+      error.message;
+
+    btnPulang.disabled =
+      false;
+
+    btnPulang.innerHTML =
+      "PULANG";
+
+  }
+
+  finally {
+
+    SEDANG_MENGIRIM =
+      false;
+  }
+}
   // ==================================================
   // GPS WAJIB SUDAH DIAMBIL
   // ==================================================
