@@ -845,7 +845,10 @@ function kirimDataAbsensi(
   tipe,
   deviceId,
   sumber,
-  faceScore
+  faceScore,
+  latitude,
+  longitude,
+  accuracy
 ) {
 
   return new Promise((resolve, reject) => {
@@ -854,10 +857,8 @@ function kirimDataAbsensi(
       "callbackAbsensi_" +
       Date.now();
 
-
     const script =
       document.createElement("script");
-
 
     const timeout =
       setTimeout(() => {
@@ -872,7 +873,6 @@ function kirimDataAbsensi(
 
       }, 15000);
 
-
     function cleanup() {
 
       clearTimeout(timeout);
@@ -882,9 +882,7 @@ function kirimDataAbsensi(
       }
 
       delete window[callbackName];
-
     }
-
 
     window[callbackName] =
       function(data) {
@@ -892,9 +890,7 @@ function kirimDataAbsensi(
         cleanup();
 
         resolve(data);
-
       };
-
 
     script.onerror =
       function() {
@@ -906,9 +902,7 @@ function kirimDataAbsensi(
             "Gagal terhubung ke API absensi."
           )
         );
-
       };
-
 
     script.src =
 
@@ -931,17 +925,23 @@ function kirimDataAbsensi(
       "&faceScore=" +
       encodeURIComponent(faceScore) +
 
+      "&latitude=" +
+      encodeURIComponent(latitude) +
+
+      "&longitude=" +
+      encodeURIComponent(longitude) +
+
+      "&accuracy=" +
+      encodeURIComponent(accuracy) +
+
       "&callback=" +
       encodeURIComponent(callbackName) +
 
       "&t=" +
       Date.now();
 
-
     document.body.appendChild(script);
-
   });
-
 }
 
 
@@ -1334,17 +1334,14 @@ async function kirimMasuk() {
       "statusAbsensi"
     );
 
-
   const btnMasuk =
     document.getElementById(
       "btnMasuk"
     );
 
-
   if (SEDANG_MENGIRIM) {
     return;
   }
-
 
   if (!KARYAWAN_AKTIF) {
 
@@ -1352,9 +1349,7 @@ async function kirimMasuk() {
       "❌ Karyawan belum dikenali.";
 
     return;
-
   }
-
 
   if (
     !FACE_SCORE_TERAKHIR ||
@@ -1365,34 +1360,37 @@ async function kirimMasuk() {
       "❌ Verifikasi wajah belum valid.";
 
     return;
-
   }
 
+  // ==================================================
+  // GPS WAJIB SUDAH DIAMBIL
+  // ==================================================
+
+  if (!GPS_TERAKHIR) {
+
+    statusAbsensi.innerHTML =
+      "❌ GPS belum diambil.<br>" +
+      "Tekan AMBIL LOKASI GPS terlebih dahulu.";
+
+    return;
+  }
 
   try {
 
-    SEDANG_MENGIRIM =
-      true;
+    SEDANG_MENGIRIM = true;
 
-
-    btnMasuk.disabled =
-      true;
-
+    btnMasuk.disabled = true;
 
     btnMasuk.innerHTML =
       "⏳ MENGIRIM...";
 
-
     statusAbsensi.innerHTML =
-      "⏳ Mengirim absensi MASUK ke server...";
-
+      "⏳ Mengirim absensi MASUK dan GPS ke server...";
 
     const deviceId =
       getDeviceId();
 
-
     const respon =
-
       await kirimDataAbsensi(
 
         KARYAWAN_AKTIF.idKaryawan,
@@ -1403,10 +1401,15 @@ async function kirimMasuk() {
 
         "KIOSK",
 
-        FACE_SCORE_TERAKHIR
+        FACE_SCORE_TERAKHIR,
+
+        GPS_TERAKHIR.latitude,
+
+        GPS_TERAKHIR.longitude,
+
+        GPS_TERAKHIR.accuracy
 
       );
-
 
     if (
       !respon ||
@@ -1424,19 +1427,39 @@ async function kirimMasuk() {
             : "Tidak ada respons server."
         );
 
-
       btnMasuk.disabled =
         false;
 
+      btnMasuk.innerHTML =
+        "MASUK";
 
       return;
-
     }
-
 
     const transaksi =
       respon.transaksi || {};
 
+    const geofence =
+      respon.geofence || {};
+
+    let statusGeo =
+      geofence.status || "-";
+
+    let jarakGeo =
+      geofence.jarak;
+
+    if (
+      jarakGeo === "" ||
+      jarakGeo === null ||
+      jarakGeo === undefined
+    ) {
+      jarakGeo = "-";
+    }
+    else {
+      jarakGeo =
+        Number(jarakGeo).toFixed(2) +
+        " meter";
+    }
 
     statusAbsensi.innerHTML =
 
@@ -1447,25 +1470,30 @@ async function kirimMasuk() {
       "<br>" +
 
       "Tanggal: <b>" +
-
       (transaksi.tanggal || "-") +
-
       "</b><br>" +
 
       "Jam: <b>" +
-
       (transaksi.jam || "-") +
+      "</b><br>" +
 
+      "Lokasi ID: <b>" +
+      (geofence.lokasiId || "-") +
+      "</b><br>" +
+
+      "Jarak: <b>" +
+      jarakGeo +
+      "</b><br>" +
+
+      "Geofence: <b>" +
+      statusGeo +
       "</b><br>" +
 
       "ID: " +
-
       (transaksi.idTransaksi || "-");
-
 
     btnMasuk.innerHTML =
       "✅ MASUK TERCATAT";
-
 
     btnMasuk.disabled =
       true;
@@ -1476,17 +1504,13 @@ async function kirimMasuk() {
 
     console.error(error);
 
-
     statusAbsensi.innerHTML =
 
       "❌ Gagal mengirim absensi:<br>" +
-
       error.message;
-
 
     btnMasuk.disabled =
       false;
-
 
     btnMasuk.innerHTML =
       "MASUK";
@@ -1497,11 +1521,8 @@ async function kirimMasuk() {
 
     SEDANG_MENGIRIM =
       false;
-
   }
-
 }
-
 </script>
 
 </body>
