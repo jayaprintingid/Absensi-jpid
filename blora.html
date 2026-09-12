@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>Absensi JPID</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f2f4f7;
+  text-align: center;
+}
+
+.box {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+h1 {
+  margin: 0;
+}
+
+.subjudul {
+  margin-top: 7px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.kamera {
+  width: 100%;
+  background: #111;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+video {
+  width: 100%;
+  min-height: 300px;
+  display: block;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+button {
+  width: 100%;
+  padding: 16px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#btnKamera {
+  background: #1769c2;
+  color: white;
+}
+
+#btnDaftarWajah {
+  background: #6a1b9a;
+  color: white;
+}
+
+#btnKenaliWajah {
+  background: #00838f;
+  color: white;
+}
+
+#btnLokasi {
+  background: #f9a825;
+  color: #222;
+}
+
+#statusKamera {
+  margin: 12px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+#statusAbsensi {
+  margin-top: 15px;
+  padding: 13px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+#statusLokasi {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.identitas {
+  margin-top: 18px;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 12px;
+}
+
+.nama {
+  font-size: 21px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.id {
+  color: #555;
+  margin-top: 5px;
+}
+
+.belum {
+  color: #b71c1c;
+  font-weight: bold;
+}
+
+.dikenali {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.btnMasuk {
+  background: #2e7d32;
+  color: white;
+}
+
+.btnPulang {
+  background: #d84315;
+  color: white;
+}
+
+button:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>ABSENSI JPID</h1>
+
+  <div class="subjudul">
+    Sistem Absensi Wajah Multi Perusahaan
+  </div>
+
+  <div class="kamera">
+
+    <video
+      id="video"
+      autoplay
+      muted
+      playsinline>
+    </video>
+
+  </div>
+
+  <button
+    id="btnKamera"
+    onclick="aktifkanKamera()">
+
+    📷 AKTIFKAN KAMERA
+
+  </button>
+
+  <div id="statusKamera">
+    Kamera belum diaktifkan
+  </div>
+
+  <div class="identitas">
+
+    <div>Karyawan</div>
+
+    <div
+      id="namaKaryawan"
+      class="nama belum">
+
+      Belum dikenali
+
+    </div>
+
+    <div
+      id="idKaryawan"
+      class="id">
+      ID: -
+    </div>
+
+    <div
+      id="perusahaan"
+      class="id">
+      Perusahaan: -
+    </div>
+
+    <div
+      id="divisi"
+      class="id">
+      Divisi: -
+    </div>
+
+    <div
+      id="jabatan"
+      class="id">
+      Jabatan: -
+    </div>
+
+    <div
+      id="lokasi"
+      class="id">
+      Lokasi: -
+    </div>
+
+  </div>
+
+  <button
+    id="btnDaftarWajah"
+    onclick="daftarWajah()">
+
+    👤 DAFTARKAN WAJAH KRY0001
+
+  </button>
+
+  <button
+    id="btnKenaliWajah"
+    onclick="kenaliWajah()">
+
+    🔎 KENALI WAJAH KRY0001
+
+  </button>
+
+  <button
+    id="btnLokasi"
+    onclick="ambilLokasiGPS()">
+
+    📍 AMBIL LOKASI GPS
+
+  </button>
+
+  <div id="statusLokasi">
+    Lokasi GPS belum diambil.
+  </div>
+
+  <button
+    id="btnMasuk"
+    class="btnMasuk"
+    onclick="kirimMasuk()"
+    disabled>
+
+    MASUK
+
+  </button>
+
+  <button
+    id="btnPulang"
+    class="btnPulang"
+    onclick="kirimPulang()"
+    disabled>
+
+    PULANG
+
+  </button>
+
+  <div id="statusAbsensi">
+    Belum ada transaksi absensi.
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.js"></script>
+
+<script>
+
+// ======================================================
+// URL API APPS SCRIPT
+// ======================================================
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyRz0xKJg92iBx9ALExbKYEt8wVfDJhWnQ0vMwW6OnLrwOx7E4YYWtW0pkOJRGZMZJT/exec";
+
+
+// ======================================================
+// DATA SESI ABSENSI
+// ======================================================
+
+let KARYAWAN_AKTIF = null;
+
+let FACE_SCORE_TERAKHIR = 0;
+
+let SEDANG_MENGIRIM = false;
+
+let GPS_TERAKHIR = null;
+
+
+// ======================================================
+// DEVICE ID
+// ======================================================
+
+function getDeviceId() {
+
+  const deviceId =
+    "DEV-KIOSK-02";
+
+  localStorage.setItem(
+    "JPID_DEVICE_ID",
+    deviceId
+  );
+
+  return deviceId;
+}
+
+
+// ======================================================
+// HUMAN FACE ENGINE
+// ======================================================
+
+const human =
+  new Human.Human({
+
+    backend: "webgl",
+
+    modelBasePath:
+      "https://cdn.jsdelivr.net/npm/@vladmandic/human/models/",
+
+    body: {
+      enabled: false
+    },
+
+    hand: {
+      enabled: false
+    },
+
+    object: {
+      enabled: false
+    },
+
+    face: {
+
+      enabled: true,
+
+      detector: {
+        enabled: true,
+        maxDetected: 1,
+        rotation: true
+      },
+
+      mesh: {
+        enabled: true
+      },
+
+      iris: {
+        enabled: false
+      },
+
+      description: {
+        enabled: true
+      },
+
+      emotion: {
+        enabled: false
+      },
+
+      antispoof: {
+        enabled: false
+      },
+
+      liveness: {
+        enabled: false
+      }
+
+    }
+
+  });
+
+
+// ======================================================
+// AKTIFKAN KAMERA
+// ======================================================
+
+async function aktifkanKamera() {
+
+  const video =
+    document.getElementById(
+      "video"
+    );
+
+  const status =
+    document.getElementById(
+      "statusKamera"
+    );
+
+  try {
+
+    status.innerHTML =
+      "⏳ Mengaktifkan kamera...";
+
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+          facingMode: "user"
+        },
+
+        audio: false
+
+      });
+
+    video.srcObject =
+      stream;
+
+    status.innerHTML =
+      "✅ Kamera aktif";
+
+    document.getElementById(
+      "btnKamera"
+    ).innerHTML =
+      "✅ KAMERA AKTIF";
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+    status.innerHTML =
+      "❌ Kamera gagal: " +
+      error.message;
+
+  }
+}
+
+
+// ======================================================
+// GPS
+// ======================================================
+
+function ambilLokasiGPS() {
+
+  const btn =
+    document.getElementById(
+      "btnLokasi"
+    );
+
+  const status =
+    document.getElementById(
+      "statusLokasi"
+    );
+
+  if (!navigator.geolocation) {
+
+    status.innerHTML =
+      "❌ Perangkat/browser tidak mendukung GPS.";
+
+    return;
+  }
+
+  btn.disabled =
+    true;
+
+  btn.innerHTML =
+    "⏳ MENGAMBIL GPS...";
+
+  status.innerHTML =
+    "⏳ Meminta lokasi perangkat...";
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(posisi) {
+
+      const lat =
+        posisi.coords.latitude;
+
+      const lng =
+        posisi.coords.longitude;
+
+      const accuracy =
+        posisi.coords.accuracy;
+
+      GPS_TERAKHIR = {
+
+        latitude:
+          lat,
+
+        longitude:
+          lng,
+
+        accuracy:
+          accuracy,
+
+        timestamp:
+          Date.now()
+
+      };
+
+      status.innerHTML =
+        "✅ <b>GPS BERHASIL</b><br>" +
+        "Latitude: <b>" +
+        lat.toFixed(7) +
+        "</b><br>" +
+        "Longitude: <b>" +
+        lng.toFixed(7) +
+        "</b><br>" +
+        "Akurasi: <b>" +
+        Math.round(accuracy) +
+        " meter</b>";
+
+      btn.innerHTML =
+        "✅ GPS TERSAMBUNG";
+
+      btn.disabled =
+        false;
+
+    },
+
+    function(error) {
+
+      console.error(error);
+
+      let pesan =
+        "Lokasi gagal diambil.";
+
+      if (error.code === 1) {
+
+        pesan =
+          "Izin lokasi ditolak. Izinkan akses lokasi di browser.";
+
+      }
+
+      else if (error.code === 2) {
+
+        pesan =
+          "Lokasi perangkat tidak tersedia.";
+
+      }
+
+      else if (error.code === 3) {
+
+        pesan =
+          "Pengambilan lokasi terlalu lama / timeout.";
+
+      }
+
+      status.innerHTML =
+        "❌ " +
+        pesan;
+
+      btn.innerHTML =
+        "📍 AMBIL LOKASI GPS";
+
+      btn.disabled =
+        false;
+
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 0
+    }
+
+  );
+}
+
+
+// ======================================================
+// DAFTARKAN WAJAH
+// ======================================================
+
+async function daftarWajah() {
+
+  const video =
+    document.getElementById(
+      "video"
+    );
+
+  const status =
+    document.getElementById(
+      "statusKamera"
+    );
+
+  try {
+
+    if (!video.srcObject) {
+
+      status.innerHTML =
+        "❌ Aktifkan kamera terlebih dahulu.";
+
+      return;
+    }
+
+    status.innerHTML =
+      "⏳ Menyiapkan model wajah...";
+
+    await human.load();
+
+    status.innerHTML =
+      "⏳ Membaca wajah KRY0003...";
+
+    const hasil =
+      await human.detect(
+        video
+      );
+
+    if (
+      !hasil.face ||
+      hasil.face.length === 0
+    ) {
+
+      status.innerHTML =
+        "❌ Wajah tidak ditemukan.";
+
+      return;
+    }
+
+    const wajah =
+      hasil.face[0];
+
+    if (!wajah.embedding) {
+
+      status.innerHTML =
+        "❌ Data wajah belum berhasil dibuat.";
+
+      return;
+    }
+
+    localStorage.setItem(
+
+      "FACE_KRY0001",
+
+      JSON.stringify(
+        Array.from(
+          wajah.embedding
+        )
+      )
+
+    );
+
+    status.innerHTML =
+      "✅ Wajah KRY0001 berhasil didaftarkan.";
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+    status.innerHTML =
+      "❌ Gagal mendaftarkan wajah: " +
+      error.message;
+
+  }
+}
+
+
+// ======================================================
+// AMBIL DATA KARYAWAN
+// ======================================================
+
+function ambilDataKaryawan(
+  idKaryawan
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const callbackName =
+        "callbackKaryawan_" +
+        Date.now();
+
+      const script =
+        document.createElement(
+          "script"
+        );
+
+      const timeout =
+        setTimeout(() => {
+
+          cleanup();
+
+          reject(
+            new Error(
+              "API tidak memberikan respons."
+            )
+          );
+
+        }, 15000);
+
+      function cleanup() {
+
+        clearTimeout(
+          timeout
+        );
+
+        if (
+          script.parentNode
+        ) {
+
+          script.parentNode
+            .removeChild(
+              script
+            );
+        }
+
+        delete window[
+          callbackName
+        ];
+      }
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
+          cleanup();
+
+          resolve(
+            data
+          );
+        };
+
+      script.onerror =
+        function() {
+
+          cleanup();
+
+          reject(
+            new Error(
+              "Gagal terhubung ke API."
+            )
+          );
+        };
+
+      script.src =
+        API_URL +
+        "?api=karyawan" +
+        "&id=" +
+        encodeURIComponent(
+          idKaryawan
+        ) +
+        "&callback=" +
+        encodeURIComponent(
+          callbackName
+        ) +
+        "&t=" +
+        Date.now();
+
+      document.body
+        .appendChild(
+          script
+        );
+
+    }
+  );
+}
+
+
+// ======================================================
+// KIRIM ABSENSI
+// ======================================================
+
+function kirimDataAbsensi(
+  idKaryawan,
+  tipe,
+  deviceId,
+  sumber,
+  faceScore,
+  latitude,
+  longitude,
+  accuracy
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const callbackName =
+        "callbackAbsensi_" +
+        Date.now();
+
+      const script =
+        document.createElement(
+          "script"
+        );
+
+      const timeout =
+        setTimeout(() => {
+
+          cleanup();
+
+          reject(
+            new Error(
+              "API absensi tidak memberikan respons."
+            )
+          );
+
+        }, 15000);
+
+      function cleanup() {
+
+        clearTimeout(
+          timeout
+        );
+
+        if (
+          script.parentNode
+        ) {
+
+          script.parentNode
+            .removeChild(
+              script
+            );
+        }
+
+        delete window[
+          callbackName
+        ];
+      }
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
+          cleanup();
+
+          resolve(
+            data
+          );
+        };
+
+      script.onerror =
+        function() {
+
+          cleanup();
+
+          reject(
+            new Error(
+              "Gagal terhubung ke API absensi."
+            )
+          );
+        };
+
+      script.src =
+        API_URL +
+        "?api=absen" +
+        "&id=" +
+        encodeURIComponent(
+          idKaryawan
+        ) +
+        "&tipe=" +
+        encodeURIComponent(
+          tipe
+        ) +
+        "&deviceId=" +
+        encodeURIComponent(
+          deviceId
+        ) +
+        "&sumber=" +
+        encodeURIComponent(
+          sumber
+        ) +
+        "&faceScore=" +
+        encodeURIComponent(
+          faceScore
+        ) +
+        "&latitude=" +
+        encodeURIComponent(
+          latitude
+        ) +
+        "&longitude=" +
+        encodeURIComponent(
+          longitude
+        ) +
+        "&accuracy=" +
+        encodeURIComponent(
+          accuracy
+        ) +
+        "&callback=" +
+        encodeURIComponent(
+          callbackName
+        ) +
+        "&t=" +
+        Date.now();
+
+      document.body
+        .appendChild(
+          script
+        );
+
+    }
+  );
+}
+
+
+// ======================================================
+// RESET IDENTITAS
+// ======================================================
+
+function resetIdentitas() {
+
+  KARYAWAN_AKTIF =
+    null;
+
+  FACE_SCORE_TERAKHIR =
+    0;
+
+  const nama =
+    document.getElementById(
+      "namaKaryawan"
+    );
+
+  nama.innerHTML =
+    "Belum dikenali";
+
+  nama.classList.remove(
+    "dikenali"
+  );
+
+  nama.classList.add(
+    "belum"
+  );
+
+  document.getElementById(
+    "idKaryawan"
+  ).innerHTML =
+    "ID: -";
+
+  document.getElementById(
+    "perusahaan"
+  ).innerHTML =
+    "Perusahaan: -";
+
+  document.getElementById(
+    "divisi"
+  ).innerHTML =
+    "Divisi: -";
+
+  document.getElementById(
+    "jabatan"
+  ).innerHTML =
+    "Jabatan: -";
+
+  document.getElementById(
+    "lokasi"
+  ).innerHTML =
+    "Lokasi: -";
+
+  document.getElementById(
+    "btnMasuk"
+  ).disabled =
+    true;
+
+  document.getElementById(
+    "btnPulang"
+  ).disabled =
+    true;
+}
+
+
+// ======================================================
+// TAMPILKAN DATA KARYAWAN
+// ======================================================
+
+function tampilkanKaryawan(
+  karyawan
+) {
+
+  KARYAWAN_AKTIF =
+    karyawan;
+
+  const nama =
+    document.getElementById(
+      "namaKaryawan"
+    );
+
+  nama.innerHTML =
+    karyawan.nama;
+
+  nama.classList.remove(
+    "belum"
+  );
+
+  nama.classList.add(
+    "dikenali"
+  );
+
+  document.getElementById(
+    "idKaryawan"
+  ).innerHTML =
+    "ID: " +
+    karyawan.idKaryawan;
+
+  document.getElementById(
+    "perusahaan"
+  ).innerHTML =
+    "Perusahaan: " +
+    karyawan.namaPerusahaan;
+
+  document.getElementById(
+    "divisi"
+  ).innerHTML =
+    "Divisi: " +
+    karyawan.divisi;
+
+  document.getElementById(
+    "jabatan"
+  ).innerHTML =
+    "Jabatan: " +
+    karyawan.jabatan;
+
+  document.getElementById(
+    "lokasi"
+  ).innerHTML =
+    "Lokasi: " +
+    karyawan.lokasi;
+
+  document.getElementById(
+    "btnMasuk"
+  ).disabled =
+    false;
+
+  document.getElementById(
+    "btnPulang"
+  ).disabled =
+    false;
+}
+
+
+// ======================================================
+// KENALI WAJAH
+// ======================================================
+
+async function kenaliWajah() {
+
+  const video =
+    document.getElementById(
+      "video"
+    );
+
+  const status =
+    document.getElementById(
+      "statusKamera"
+    );
+
+  try {
+
+    resetIdentitas();
+
+    document.getElementById(
+      "statusAbsensi"
+    ).innerHTML =
+      "Belum ada transaksi absensi.";
+
+    if (!video.srcObject) {
+
+      status.innerHTML =
+        "❌ Aktifkan kamera terlebih dahulu.";
+
+      return;
+    }
+
+    const dataTersimpan =
+      localStorage.getItem(
+        "FACE_KRY0003"
+      );
+
+    if (!dataTersimpan) {
+
+      status.innerHTML =
+        "❌ Wajah KRY0001 belum didaftarkan.";
+
+      return;
+    }
+
+    status.innerHTML =
+      "⏳ Membaca wajah...";
+
+    await human.load();
+
+    const hasil =
+      await human.detect(
+        video
+      );
+
+    if (
+      !hasil.face ||
+      hasil.face.length === 0
+    ) {
+
+      status.innerHTML =
+        "❌ Wajah tidak ditemukan.";
+
+      return;
+    }
+
+    const wajahSekarang =
+      hasil.face[0].embedding;
+
+    if (!wajahSekarang) {
+
+      status.innerHTML =
+        "❌ Data wajah tidak berhasil dibuat.";
+
+      return;
+    }
+
+    const wajahTersimpan =
+      JSON.parse(
+        dataTersimpan
+      );
+
+    const kemiripan =
+      human.match.similarity(
+        wajahTersimpan,
+        wajahSekarang
+      );
+
+    const persen =
+      Math.round(
+        kemiripan * 100
+      );
+
+    if (
+      kemiripan < 0.50
+    ) {
+
+      status.innerHTML =
+        "❌ Wajah tidak cocok<br>" +
+        "Kemiripan: <b>" +
+        persen +
+        "%</b>";
+
+      return;
+    }
+
+    status.innerHTML =
+      "✅ Wajah cocok " +
+      persen +
+      "%<br>" +
+      "⏳ Mengambil data karyawan...";
+
+    const respon =
+      await ambilDataKaryawan(
+        "KRY0003"
+      );
+
+    if (
+      !respon ||
+      respon.sukses !== true
+    ) {
+
+      status.innerHTML =
+        "❌ Data karyawan gagal dibaca.<br>" +
+        (
+          respon &&
+          respon.pesan
+            ? respon.pesan
+            : ""
+        );
+
+      return;
+    }
+
+    FACE_SCORE_TERAKHIR =
+      kemiripan;
+
+    tampilkanKaryawan(
+      respon.karyawan
+    );
+
+    status.innerHTML =
+      "✅ KRY0003 dikenali<br>" +
+      "Kemiripan: <b>" +
+      persen +
+      "%</b><br>" +
+      "✅ Data MASTER KARYAWAN terhubung";
+
+  }
+
+  catch(error) {
+
+    console.error(
+      error
+    );
+
+    resetIdentitas();
+
+    status.innerHTML =
+      "❌ Gagal mengenali karyawan:<br>" +
+      error.message;
+
+  }
+}
+
+
+// ======================================================
+// ABSENSI MASUK
+// ======================================================
+
+async function kirimMasuk() {
+
+  const statusAbsensi =
+    document.getElementById(
+      "statusAbsensi"
+    );
+
+  const btnMasuk =
+    document.getElementById(
+      "btnMasuk"
+    );
+
+  if (
+    SEDANG_MENGIRIM
+  ) {
+    return;
+  }
+
+  if (
+    !KARYAWAN_AKTIF
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ Karyawan belum dikenali.";
+
+    return;
+  }
+
+  if (
+    !FACE_SCORE_TERAKHIR ||
+    FACE_SCORE_TERAKHIR < 0.50
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ Verifikasi wajah belum valid.";
+
+    return;
+  }
+
+  if (
+    !GPS_TERAKHIR
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ GPS belum diambil.<br>" +
+      "Tekan AMBIL LOKASI GPS terlebih dahulu.";
+
+    return;
+  }
+
+  try {
+
+    SEDANG_MENGIRIM =
+      true;
+
+    btnMasuk.disabled =
+      true;
+
+    btnMasuk.innerHTML =
+      "⏳ MENGIRIM...";
+
+    statusAbsensi.innerHTML =
+      "⏳ Mengirim absensi MASUK dan GPS ke server...";
+
+    const deviceId =
+      getDeviceId();
+
+    const respon =
+      await kirimDataAbsensi(
+
+        KARYAWAN_AKTIF.idKaryawan,
+
+        "MASUK",
+
+        deviceId,
+
+        "KIOSK",
+
+        FACE_SCORE_TERAKHIR,
+
+        GPS_TERAKHIR.latitude,
+
+        GPS_TERAKHIR.longitude,
+
+        GPS_TERAKHIR.accuracy
+
+      );
+
+    if (
+      !respon ||
+      respon.sukses !== true
+    ) {
+
+      statusAbsensi.innerHTML =
+        "❌ Absensi MASUK gagal.<br>" +
+        (
+          respon &&
+          respon.pesan
+            ? respon.pesan
+            : "Tidak ada respons server."
+        );
+
+      btnMasuk.disabled =
+        false;
+
+      btnMasuk.innerHTML =
+        "MASUK";
+
+      return;
+    }
+
+    const transaksi =
+      respon.transaksi || {};
+
+    const geofence =
+      respon.geofence || {};
+
+    let jarakGeo =
+      geofence.jarak;
+
+    if (
+      jarakGeo === "" ||
+      jarakGeo === null ||
+      jarakGeo === undefined
+    ) {
+
+      jarakGeo =
+        "-";
+
+    }
+
+    else {
+
+      jarakGeo =
+        Number(
+          jarakGeo
+        ).toFixed(2) +
+        " meter";
+
+    }
+
+    statusAbsensi.innerHTML =
+      "✅ <b>ABSENSI MASUK BERHASIL</b><br>" +
+      KARYAWAN_AKTIF.nama +
+      "<br>" +
+      "Tanggal: <b>" +
+      (transaksi.tanggal || "-") +
+      "</b><br>" +
+      "Jam: <b>" +
+      (transaksi.jam || "-") +
+      "</b><br>" +
+      "Lokasi ID: <b>" +
+      (geofence.lokasiId || "-") +
+      "</b><br>" +
+      "Jarak: <b>" +
+      jarakGeo +
+      "</b><br>" +
+      "Geofence: <b>" +
+      (geofence.status || "-") +
+      "</b><br>" +
+      "ID: " +
+      (transaksi.idTransaksi || "-");
+
+    btnMasuk.innerHTML =
+      "✅ MASUK TERCATAT";
+
+    btnMasuk.disabled =
+      true;
+
+    document.getElementById(
+      "btnPulang"
+    ).disabled =
+      false;
+
+  }
+
+  catch(error) {
+
+    console.error(
+      error
+    );
+
+    statusAbsensi.innerHTML =
+      "❌ Gagal mengirim absensi MASUK:<br>" +
+      error.message;
+
+    btnMasuk.disabled =
+      false;
+
+    btnMasuk.innerHTML =
+      "MASUK";
+
+  }
+
+  finally {
+
+    SEDANG_MENGIRIM =
+      false;
+
+  }
+}
+
+
+// ======================================================
+// ABSENSI PULANG
+// ======================================================
+
+async function kirimPulang() {
+
+  const statusAbsensi =
+    document.getElementById(
+      "statusAbsensi"
+    );
+
+  const btnPulang =
+    document.getElementById(
+      "btnPulang"
+    );
+
+  if (
+    SEDANG_MENGIRIM
+  ) {
+    return;
+  }
+
+  if (
+    !KARYAWAN_AKTIF
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ Karyawan belum dikenali.";
+
+    return;
+  }
+
+  if (
+    !FACE_SCORE_TERAKHIR ||
+    FACE_SCORE_TERAKHIR < 0.50
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ Verifikasi wajah belum valid.";
+
+    return;
+  }
+
+  if (
+    !GPS_TERAKHIR
+  ) {
+
+    statusAbsensi.innerHTML =
+      "❌ GPS belum diambil.<br>" +
+      "Tekan AMBIL LOKASI GPS terlebih dahulu.";
+
+    return;
+  }
+
+  try {
+
+    SEDANG_MENGIRIM =
+      true;
+
+    btnPulang.disabled =
+      true;
+
+    btnPulang.innerHTML =
+      "⏳ MENGIRIM...";
+
+    statusAbsensi.innerHTML =
+      "⏳ Mengirim absensi PULANG dan GPS ke server...";
+
+    const deviceId =
+      getDeviceId();
+
+    const respon =
+      await kirimDataAbsensi(
+
+        KARYAWAN_AKTIF.idKaryawan,
+
+        "PULANG",
+
+        deviceId,
+
+        "KIOSK",
+
+        FACE_SCORE_TERAKHIR,
+
+        GPS_TERAKHIR.latitude,
+
+        GPS_TERAKHIR.longitude,
+
+        GPS_TERAKHIR.accuracy
+
+      );
+
+    if (
+      !respon ||
+      respon.sukses !== true
+    ) {
+
+      statusAbsensi.innerHTML =
+        "❌ Absensi PULANG gagal.<br>" +
+        (
+          respon &&
+          respon.pesan
+            ? respon.pesan
+            : "Tidak ada respons server."
+        );
+
+      btnPulang.disabled =
+        false;
+
+      btnPulang.innerHTML =
+        "PULANG";
+
+      return;
+    }
+
+    const transaksi =
+      respon.transaksi || {};
+
+    const geofence =
+      respon.geofence || {};
+
+    let jarakGeo =
+      geofence.jarak;
+
+    if (
+      jarakGeo === "" ||
+      jarakGeo === null ||
+      jarakGeo === undefined
+    ) {
+
+      jarakGeo =
+        "-";
+
+    }
+
+    else {
+
+      jarakGeo =
+        Number(
+          jarakGeo
+        ).toFixed(2) +
+        " meter";
+
+    }
+
+    statusAbsensi.innerHTML =
+      "✅ <b>ABSENSI PULANG BERHASIL</b><br>" +
+      KARYAWAN_AKTIF.nama +
+      "<br>" +
+      "Tanggal: <b>" +
+      (transaksi.tanggal || "-") +
+      "</b><br>" +
+      "Jam: <b>" +
+      (transaksi.jam || "-") +
+      "</b><br>" +
+      "Lokasi ID: <b>" +
+      (geofence.lokasiId || "-") +
+      "</b><br>" +
+      "Jarak: <b>" +
+      jarakGeo +
+      "</b><br>" +
+      "Geofence: <b>" +
+      (geofence.status || "-") +
+      "</b><br>" +
+      "ID: " +
+      (transaksi.idTransaksi || "-");
+
+    btnPulang.innerHTML =
+      "✅ PULANG TERCATAT";
+
+    btnPulang.disabled =
+      true;
+
+    document.getElementById(
+      "btnMasuk"
+    ).disabled =
+      true;
+
+  }
+
+  catch(error) {
+
+    console.error(
+      error
+    );
+
+    statusAbsensi.innerHTML =
+      "❌ Gagal mengirim absensi PULANG:<br>" +
+      error.message;
+
+    btnPulang.disabled =
+      false;
+
+    btnPulang.innerHTML =
+      "PULANG";
+
+  }
+
+  finally {
+
+    SEDANG_MENGIRIM =
+      false;
+
+  }
+}
+
+</script>
+
+</body>
+
+</html>
