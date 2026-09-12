@@ -244,7 +244,7 @@ button:disabled {
     id="btnDaftarWajah"
     onclick="daftarWajah()">
 
-    👤 DAFTARKAN WAJAH KRY0001
+    👤 DAFTARKAN WAJAH KRY0003
 
   </button>
 
@@ -252,8 +252,7 @@ button:disabled {
     id="btnKenaliWajah"
     onclick="kenaliWajah()">
 
-    🔎 KENALI WAJAH KRY0001
-
+    🔎 KENALI WAJAH KRY0003
   </button>
 
   <button
@@ -652,7 +651,7 @@ async function daftarWajah() {
 
     localStorage.setItem(
 
-      "FACE_KRY0001",
+      "FACE_KRY0003",
 
       JSON.stringify(
         Array.from(
@@ -663,7 +662,7 @@ async function daftarWajah() {
     );
 
     status.innerHTML =
-      "✅ Wajah KRY0001 berhasil didaftarkan.";
+      "✅ Wajah KRY0003 berhasil didaftarkan.";
 
   }
 
@@ -1093,7 +1092,7 @@ async function kenaliWajah() {
     if (!dataTersimpan) {
 
       status.innerHTML =
-        "❌ Wajah KRY0001 belum didaftarkan.";
+        "❌ Wajah KRY0003 belum didaftarkan.";
 
       return;
     }
